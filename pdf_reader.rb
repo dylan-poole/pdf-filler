@@ -1,4 +1,6 @@
-require 'pdf_object'
+require_relative "reference_table"
+require_relative "pdf_object"
+
 class PdfRead
 
   attr_reader :objects
@@ -21,8 +23,9 @@ class PdfRead
   def read_reference_table
     object_strs = []
     reference_table = @pdf_data[reference_table_offset...@pdf_data.index("trailer")]
-    reference_table.split("\n")[2..-1].each do |match|
-      offset = match.split(" ")[0].to_i 
+    ReferenceTable.new(reference_table).entries.each do |entry|
+      # Here is an example of why entries might need to be their own objects....
+      offset = entry["offset"]
       # TODO find a better way, I don't like the idea of going to the last index in the array
       remaining_data = @pdf_data[offset..-1]  
       endobj_index = remaining_data.index("endobj")
